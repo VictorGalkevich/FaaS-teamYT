@@ -1,0 +1,18 @@
+services:
+  java-app:
+    build:
+      context: ./java-app
+    environment:
+      - PORT=8080
+    ports:
+      - "8080:8080"
+
+  go-app:
+    build:
+      context: ./go-app
+    environment:
+      - PORT=8081
+    ports:
+      - "8081:8081"
+    depends_on:
+      - java-app
