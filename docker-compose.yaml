@@ -1,4 +1,22 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   java-app:
     build:
       context: ./java-app
@@ -6,6 +24,9 @@ services:
       - PORT=8080
     ports:
       - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
   go-app:
     build:
@@ -16,3 +37,6 @@ services:
       - "8081:8081"
     depends_on:
       - java-app
+
+volumes:
+  pgdata:
