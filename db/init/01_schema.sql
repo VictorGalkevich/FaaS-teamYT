@@ -22,5 +22,6 @@ CREATE TABLE IF NOT EXISTS execution_metrics (
     exec_ms       NUMERIC(30,0)  NOT NULL,
     mem_mb_ms     NUMERIC(30,0)  NOT NULL,
     cpu_mcpu_ms   NUMERIC(30,0)  NOT NULL,
-    cold_start    NUMERIC(30,0)  NOT NULL
+    cold_start    NUMERIC(30,0)  NOT NULL,
+    ts            timestamptz NOT NULL
 );
