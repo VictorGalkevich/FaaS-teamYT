@@ -7,13 +7,13 @@ INSERT INTO free_tier (calls, exec_ms, mem_mb_ms, cpu_mcpu_ms)
 VALUES (100000, 0, 0, 0);
 
 -- execution_metrics (по заданным значениям и ревизии)
-INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start)
-VALUES ('absdchase1', 1200000, 180000000, 126000000000, 46080000000, 500);
+INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start, ts)
+VALUES ('absdchase1', 1200000, 180000000, 126000000000, 46080000000, 500, now());
 
 -- execution_metrics (по заданным значениям и ревизии)
-INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start)
-VALUES ('absdchase2', 200000, 180000000, 126000000000, 46080000000, 500);
+INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start, ts)
+VALUES ('absdchase2', 200000, 180000000, 126000000000, 46080000000, 500, now());
 
 -- execution_metrics (по заданным значениям и ревизии)
-INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start)
-VALUES ('absdchase3', 2000000, 180000000, 126000000000, 46080000000, 500);
+INSERT INTO execution_metrics (revision, calls, exec_ms, mem_mb_ms, cpu_mcpu_ms, cold_start, ts)
+VALUES ('absdchase3', 2000000, 180000000, 126000000000, 46080000000, 500, now());
