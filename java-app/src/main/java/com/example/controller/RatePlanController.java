@@ -3,9 +3,9 @@ package com.example.controller;
 import com.example.domain.RatePlans;
 import com.example.service.RatePlanService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/rateplans")
@@ -18,10 +18,13 @@ public class RatePlanController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> saveRatePlans(RatePlans ratePlans) {
+    public ResponseEntity<Void> saveRatePlans(@RequestBody RatePlans ratePlans) {
         ratePlanService.save(ratePlans);
         return ResponseEntity.noContent().build();
     }
 
-
+    @GetMapping
+    public List<RatePlans> getOne() {
+        return ratePlanService.get();
+    }
 }
