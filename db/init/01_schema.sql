@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS execution_metrics (
   memory_mib DOUBLE PRECISION NOT NULL,
   pods_count BIGINT NOT NULL
  );
- 
+
  CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics(timestamp);
 
  CREATE TABLE IF NOT EXISTS container_last_metrics (
