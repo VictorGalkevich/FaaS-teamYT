@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
-    @GetMapping("/")
+    @GetMapping("/asd")
     public String hello() {
         return "Hello from Java (Spring Boot, separated)";
     }
