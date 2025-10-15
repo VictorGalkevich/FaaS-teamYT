@@ -1,25 +1,52 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
-	"net/http"
-	"os"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func main() {
-	port := getenv("PORT", "8081")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		fmt.Fprintln(w, "Hello from Go")
-	})
-	log.Printf("Go app listening on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
+	config, err := clientcmd.BuildConfigFromFlags("", "/home/rycbaryana/.kube/config")
 
-func getenv(k, def string) string {
-	if v, ok := os.LookupEnv(k); ok {
-		return v
+	if err != nil {
+		panic(err.Error())
 	}
-	return def
+
+	client, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	deployments, err := client.AppsV1().Deployments("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "serving.knative.dev/service",
+	})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	services := make([]string, 0)
+	for _, deployment := range deployments.Items {
+		if serviceName := deployment.Labels["serving.knative.dev/service"]; serviceName != "" {
+			services = append(services, serviceName)
+		}
+	}
+	// fmt.Printf("SERVICES: %v\n", services)
+
+
+	ctx := context.Background()
+
+	rest := client.CoreV1().RESTClient()
+
+	result := rest.Get().Namespace("default").Resource("pods")
+	bytes, err := result.DoRaw(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Printf("%s", string(bytes))
+
 }
