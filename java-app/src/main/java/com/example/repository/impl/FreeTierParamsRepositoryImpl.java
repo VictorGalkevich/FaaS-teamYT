@@ -2,7 +2,6 @@ package com.example.repository.impl;
 
 import com.example.domain.FreeTierParams;
 import com.example.repository.interfaces.FreeTierParamsRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
-@Slf4j
 public class FreeTierParamsRepositoryImpl implements FreeTierParamsRepository {
 
     private static final String ALL = """
@@ -62,15 +60,16 @@ public class FreeTierParamsRepositoryImpl implements FreeTierParamsRepository {
                 """;
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            log.info(freeTierParams.toString());
 
             ps.setBigDecimal(1, freeTierParams.freeTierCalls());
             ps.setBigDecimal(2, freeTierParams.freeTierExecutionMs());
             ps.setBigDecimal(3, freeTierParams.freeTierMbMs());
             ps.setBigDecimal(4, freeTierParams.freeTierMcpuMs());
-            log.info(ps.toString());
 
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            if (rows != 1) {
+                throw new RuntimeException("Expected to insert 1 row into rate_plans, but inserted: " + rows);
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to save free_tier", e);
         }
