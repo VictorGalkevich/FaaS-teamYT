@@ -23,7 +23,7 @@ public class BillingService {
 
     public Invoice getInvoiceForRevision(String revision) {
         ExecutionMetrics metrics = metricsRepository.getExecutionMetricsByRevision(revision);
-        RatePlans ratePlans = ratePlansRepository.getRatePlans();
+        RatePlans ratePlans = ratePlansRepository.getCurrentRatePlans();
         FreeTierParams freeTierParams = freeTierParamsRepository.getFreeTierParams();
 
         return InvoiceCalculator.calculateInvoice(freeTierParams, metrics, ratePlans);
