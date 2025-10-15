@@ -4,4 +4,5 @@ import com.example.domain.RatePlans;
 
 public interface RatePlansRepository {
     RatePlans getRatePlans();
+    void saveRatePlans(RatePlans ratePlans);
 }

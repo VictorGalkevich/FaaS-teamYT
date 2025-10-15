@@ -45,4 +45,9 @@ public class RatePlansRepositoryImpl implements RatePlansRepository {
             throw new RuntimeException("Failed to load rate_plans", e);
         }
     }
+
+    @Override
+    public void saveRatePlans(RatePlans ratePlans) {
+
+    }
 }
