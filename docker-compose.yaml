@@ -36,7 +36,9 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - java-app
+      - java_app
+    volumes:
+      - ~/.kube/config:/app/.kube/config:ro
 
 volumes:
   pgdata:
