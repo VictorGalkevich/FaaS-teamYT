@@ -50,7 +50,7 @@ public class MetricsRepositoryImpl implements MetricsRepository {
                       name,
                       sum(request_count_delta) AS total_requests,
                       sum(total_time_ms_delta) AS total_exec_time_ms,
-                      avg(cold_start_ms_delta) AS avg_cold_start_ms,
+                      sum(cold_start_ms_delta) AS total_cold_start_ms,
                       avg(cpu_milli)           AS avg_cpu_milli,
                       avg(memory_mib)          AS avg_memory_mib
                     FROM execution_metrics
@@ -73,14 +73,14 @@ public class MetricsRepositoryImpl implements MetricsRepository {
                     var exec = rs.getBigDecimal("total_exec_time_ms");
                     var mem = rs.getBigDecimal("avg_memory_mib");
                     var cpu = rs.getBigDecimal("avg_cpu_milli");
-                    var cold_start = rs.getBigDecimal("avg_cold_start_ms");
+                    var cold_start = rs.getBigDecimal("total_cold_start_ms");
 
                     return new ExecutionMetrics(
                             calls,
-                            exec,
+                            exec.subtract(cold_start),
                             mem.multiply(exec),
                             cpu.multiply(exec),
-                            cold_start.multiply(exec)
+                            cold_start
                     );
                 } else {
                     throw new SQLException("Нет данных для " + name);
