@@ -17,7 +17,7 @@
 - [Добавление функции (`/function/add`)](#добавление-функции-functionadd)
 - [Инвойс за период (`/invoice/{name}`)](#инвойс-за-период-invoicename)
 - [Схемы данных](#схемы-данных)
-
+- [Инструкция для запуска](#инструкция-ждя-запуска)
 ---
 
 ## Форматы запросов и ответов
@@ -231,7 +231,7 @@ curl -G http://localhost:8080/invoice/test1   --data-urlencode "from=2025-10-16 
 
 ---
 
-## Инструкция для запуска:
+## Инструкция для запуска
 
 - Выполнить шаги по запуску kubernetes по [ссылке](https://github.com/stanislav-pimenov/knative-hackathon/blob/main/README.md)
 
