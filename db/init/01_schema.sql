@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS execution_metrics (
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   request_count_delta BIGINT NOT NULL,
   total_time_ms_delta DOUBLE PRECISION NOT NULL,
-  cold_start_delta DOUBLE PRECISION NOT NULL,
+  cold_start_ms_delta DOUBLE PRECISION NOT NULL,
   cpu_milli BIGINT NOT NULL,
   memory_mib DOUBLE PRECISION NOT NULL,
   pods_count BIGINT NOT NULL
