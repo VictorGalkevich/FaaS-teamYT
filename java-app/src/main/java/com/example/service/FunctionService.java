@@ -19,27 +19,27 @@ public class FunctionService {
         String template = loadTemplate("templates/function-template.yaml");
 
         String yaml = template
-                .replace("{{name}}", request.getName())
-                .replace("{{image}}", request.getImage())
-                .replace("{{port}}", String.valueOf(request.getPort()))
-                .replace("{{minScale}}", String.valueOf(request.getMinScale()))
-                .replace("{{maxScale}}", String.valueOf(request.getMaxScale()))
-                .replace("{{target}}", String.valueOf(request.getTarget()))
-                .replace("{{metric}}", request.getMetric())
-                .replace("{{timeoutSeconds}}", String.valueOf(request.getTimeoutSeconds()));
+                .replace("{{name}}", request.name())
+                .replace("{{image}}", request.image())
+                .replace("{{port}}", String.valueOf(request.port()))
+                .replace("{{minScale}}", String.valueOf(request.minScale()))
+                .replace("{{maxScale}}", String.valueOf(request.maxScale()))
+                .replace("{{target}}", String.valueOf(request.target()))
+                .replace("{{metric}}", request.metric())
+                .replace("{{timeoutSeconds}}", String.valueOf(request.timeoutSeconds()));
 
         StringBuilder argsBlock = new StringBuilder();
-        if (request.getArgs() != null && !request.getArgs().isEmpty()) {
+        if (request.args() != null && !request.args().isEmpty()) {
             argsBlock.append("args:\n");
-            for (String arg : request.getArgs()) {
+            for (String arg : request.args()) {
                 argsBlock.append("            - \"").append(arg).append("\"\n");
             }
         }
 
         StringBuilder envBlock = new StringBuilder();
-        if (request.getEnv() != null && !request.getEnv().isEmpty()) {
+        if (request.env() != null && !request.env().isEmpty()) {
             envBlock.append("          env:\n");
-            for (Map.Entry<String, String> entry : request.getEnv().entrySet()) {
+            for (Map.Entry<String, String> entry : request.env().entrySet()) {
                 envBlock.append("            - name: ").append(entry.getKey()).append("\n");
                 envBlock.append("              value: \"").append(entry.getValue()).append("\"");
             }
