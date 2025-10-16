@@ -1,80 +1,95 @@
 package com.example.service;
 
 import com.example.domain.FunctionRequest;
-import org.springframework.core.io.ClassPathResource;
+import com.google.gson.Gson;
+import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.Configuration;
+import io.kubernetes.client.openapi.apis.CustomObjectsApi;
+import io.kubernetes.client.util.Config;
 import org.springframework.stereotype.Component;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+
+import java.util.*;
 
 @Component
 public class FunctionService {
 
+    private final CustomObjectsApi customObjectsApi;
+
+    public FunctionService() throws Exception {
+        ApiClient client = Config.fromConfig("/app/.kube/config"); // путь из docker-compose
+        Configuration.setDefaultApiClient(client);
+        this.customObjectsApi = new CustomObjectsApi(client);
+    }
+
     public String addFunction(FunctionRequest request) {
-        String template = loadTemplate("templates/function-template.yaml");
-
-        String yaml = template
-                .replace("{{name}}", request.name())
-                .replace("{{image}}", request.image())
-                .replace("{{port}}", String.valueOf(request.port()))
-                .replace("{{minScale}}", String.valueOf(request.minScale()))
-                .replace("{{maxScale}}", String.valueOf(request.maxScale()))
-                .replace("{{target}}", String.valueOf(request.target()))
-                .replace("{{metric}}", request.metric())
-                .replace("{{timeoutSeconds}}", String.valueOf(request.timeoutSeconds()));
-
-        StringBuilder argsBlock = new StringBuilder();
-        if (request.args() != null && !request.args().isEmpty()) {
-            argsBlock.append("args:\n");
-            for (String arg : request.args()) {
-                argsBlock.append("            - \"").append(arg).append("\"\n");
-            }
-        }
-
-        StringBuilder envBlock = new StringBuilder();
-        if (request.env() != null && !request.env().isEmpty()) {
-            envBlock.append("          env:\n");
-            for (Map.Entry<String, String> entry : request.env().entrySet()) {
-                envBlock.append("            - name: ").append(entry.getKey()).append("\n");
-                envBlock.append("              value: \"").append(entry.getValue()).append("\"");
-            }
-        }
-
-
-        yaml = yaml.replace("{{argsBlock}}", argsBlock);
-        yaml = yaml.replace("{{envBlock}}", envBlock);
+        Map<String, Object> service = buildKnativeService(request);
 
         try {
-            ProcessBuilder pb = new ProcessBuilder("kubectl", "apply", "-f", "-");
-            Process process = pb.start();
-
-            try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()))) {
-                writer.write(yaml);
-            }
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                reader.lines().forEach(System.out::println);
-            }
-
-            process.waitFor();
-        } catch (Exception e) {
+            Object result = customObjectsApi.createNamespacedCustomObject(
+                    "serving.knative.dev",
+                    "v1",
+                    "default",
+                    "services",
+                    service,
+                    null,
+                    null,
+                    null
+            );
+            return new Gson().toJson(result);
+        } catch (ApiException e) {
+            System.err.println("Kubernetes API error:");
+            System.err.println("Code: " + e.getCode());
+            System.err.println("Body: " + e.getResponseBody());
+            System.err.println("Headers: " + e.getResponseHeaders());
             e.printStackTrace();
             return "error: " + e.getMessage();
         }
 
-        return "ok";
     }
 
-    private String loadTemplate(String path) {
-        try (InputStream is = new ClassPathResource(path).getInputStream()) {
-            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException("Template not found: " + path);
+    private Map<String, Object> buildKnativeService(FunctionRequest request) {
+        Map<String, Object> service = new LinkedHashMap<>();
+        service.put("apiVersion", "serving.knative.dev/v1");
+        service.put("kind", "Service");
+
+        Map<String, Object> metadata = Map.of("name", request.name(), "namespace", "default");
+        service.put("metadata", metadata);
+
+        Map<String, Object> annotations = Map.of(
+                "autoscaling.knative.dev/minScale", String.valueOf(request.minScale()),
+                "autoscaling.knative.dev/maxScale", String.valueOf(request.maxScale()),
+                "autoscaling.knative.dev/target", String.valueOf(request.target()),
+                "autoscaling.knative.dev/class", "kpa.autoscaling.knative.dev",
+                "autoscaling.knative.dev/metric", request.metric(),
+                "networking.knative.dev/ingress.class", "kourier.ingress.networking.knative.dev"
+        );
+
+        Map<String, Object> container = new LinkedHashMap<>();
+        container.put("image", request.image());
+        container.put("ports", List.of(Map.of("containerPort", request.port())));
+
+        if (request.args() != null && !request.args().isEmpty()) {
+            container.put("args", request.args());
         }
+
+        if (request.env() != null && !request.env().isEmpty()) {
+            List<Map<String, String>> envList = new ArrayList<>();
+            request.env().forEach((key, value) -> envList.add(Map.of("name", key, "value", value)));
+            container.put("env", envList);
+        }
+
+        Map<String, Object> specTemplate = Map.of(
+                "metadata", Map.of("annotations", annotations),
+                "spec", Map.of(
+                        "containers", List.of(container),
+                        "timeoutSeconds", request.timeoutSeconds()
+                )
+        );
+
+        Map<String, Object> spec = Map.of("template", specTemplate);
+        service.put("spec", spec);
+
+        return service;
     }
 }

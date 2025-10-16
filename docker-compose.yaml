@@ -27,6 +27,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ~/.kube/config:/app/.kube/config:ro
 
   go-app:
     build:
