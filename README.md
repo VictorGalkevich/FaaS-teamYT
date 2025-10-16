@@ -174,6 +174,38 @@ curl -X POST http://localhost:8080/function/add   -H "Content-Type: application/
 - `from` *(query, string, обязателен)*
 - `to` *(query, string, обязателен)*
 
+**Пример ответа**
+```json
+  {
+  "freeTierParams": {
+    "freeTierCalls": 1000,
+    "freeTierExecutionMs": 0,
+    "freeTierMbMs": 0,
+    "freeTierMcpuMs": 0
+  },
+  "ratePlans": {
+    "pricePerCall": 0.00005,
+    "pricePerMsOfExec": 0.000001,
+    "pricePerMbMsOfMem": 6.5e-9,
+    "pricePerMcpuMsOfCpu": 1.2e-8,
+    "coldStartFee": 0.05
+  },
+  "metrics": {
+    "calls": 1,
+    "execMs": 6,
+    "memMbMs": 1.74375,
+    "cpuMcpuMs": 1.2,
+    "coldStarts": 0
+  },
+  "finalCost": 0.000006025734375,
+  "costForCalls": 0,
+  "costForExecutionTime": 0.000006,
+  "costForMemoryUsed": 1.1334375e-8,
+  "costForCpuUtilization": 1.44e-8,
+  "costForColdStarts": 0
+}
+```
+
 **Формат дат/времени**
 
 ```
@@ -182,7 +214,7 @@ YYYY-MM-DD HH:MM:SS
 
 - Между датой и временем — **пробел**.
 
-**Правильно**
+**Пример**
 ```
 /invoice/test1?from=2025-10-16%2012:00:00&to=2025-10-16%2012:00:55
 ```
