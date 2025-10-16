@@ -269,6 +269,15 @@ curl -G http://localhost:8080/invoice/test1   --data-urlencode "from=2025-10-16 
 | `freeTierMbMs`         | number | Бесплатные MB·ms памяти            |
 | `freeTierMcpuMs`       | number | Бесплатные mCPU·ms                 |
 
+### Invoice
+
+| Поле                   | Тип       | Описание                                |
+|------------------------|-----------|-----------------------------------------|
+| `ratePlans`            | RatePlans | Используемый тариф                      |
+| `freeTier`             | FreeTier  | Используемый бесплатный пакет           |
+| `metrics`              | ExecutionMetrics    | Метрики посчитанные за период |
+| `finalCost`            | number    | Финальная цена                          |
+
 ### FunctionRequest
 
 | Поле             | Тип                  | Описание                              |
