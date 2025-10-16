@@ -17,16 +17,16 @@ services:
       timeout: 3s
       retries: 10
 
-  java-app:
-    build:
-      context: ./java-app
-    environment:
-      - PORT=8080
-    ports:
-      - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
+  # java-app:
+  #   build:
+  #     context: ./java-app
+  #   environment:
+  #     - PORT=8080
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
 
   go-app:
     build:
@@ -36,7 +36,10 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - java-app
+      db:
+        condition: service_healthy
+    volumes:
+      - ~/.kube/config:/app/.kube/config:ro
 
 volumes:
   pgdata:

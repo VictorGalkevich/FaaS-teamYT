@@ -7,6 +7,7 @@ import (
 )
 
 type MetricsUpdate struct {
+	FunctionName      string
 	RequestCountDelta int64
 	TotalTimeMsDelta  float64
 	CPU               int64   // milli CPU
@@ -14,8 +15,19 @@ type MetricsUpdate struct {
 	PodsCount         int64
 }
 
+func getConnectionString() string {
+	return "postgres://app:app@host.docker.internal:5432/db?sslmode=disable"
+}
+
 func main() {
-	service, err := NewService("")
+
+	_, err := NewRepository(getConnectionString())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	service, err := NewService("/app/.kube/config")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -42,7 +54,9 @@ func main() {
 					fmt.Printf("Error getting pods for function %s: %+v\n", function, err)
 				}
 
-				var metricsUpdate MetricsUpdate
+				metricsUpdate := MetricsUpdate{
+					FunctionName: function,
+				}
 
 				curMetrics := make(map[string]QueueProxyMetrics)
 
