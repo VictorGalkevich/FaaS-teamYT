@@ -9,6 +9,10 @@ import com.example.repository.interfaces.MetricsRepository;
 import com.example.repository.interfaces.RatePlansRepository;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+
 @Component
 public class BillingService {
     private final RatePlansRepository ratePlansRepository;
@@ -21,9 +25,13 @@ public class BillingService {
         this.freeTierParamsRepository = freeTierParamsRepository;
     }
 
-    public Invoice getInvoiceForRevision(String revision) {
-        ExecutionMetrics metrics = metricsRepository.getExecutionMetricsByRevision(revision);
-        RatePlans ratePlans = ratePlansRepository.getCurrentRatePlans();
+    public Invoice getInvoiceForRevision(String name) throws SQLException {
+        ExecutionMetrics metrics = metricsRepository.getExecutionMetricsByName(
+                Timestamp.from(Instant.now().minusSeconds(3600)),
+                Timestamp.from(Instant.now().plusSeconds(3600)),
+                name
+        );
+        RatePlans ratePlans = ratePlansRepository.getRatePlans();
         FreeTierParams freeTierParams = freeTierParamsRepository.getFreeTierParams();
 
         return InvoiceCalculator.calculateInvoice(freeTierParams, metrics, ratePlans);

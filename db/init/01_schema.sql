@@ -25,12 +25,12 @@ CREATE TABLE IF NOT EXISTS execution_metrics (
   cpu_milli BIGINT NOT NULL,
   memory_mib DOUBLE PRECISION NOT NULL,
   pods_count BIGINT NOT NULL
- );
+);
 
- CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics(timestamp);
 
- CREATE TABLE IF NOT EXISTS container_last_metrics (
+CREATE TABLE IF NOT EXISTS container_last_metrics (
   container_id TEXT PRIMARY KEY,
   request_count_delta BIGINT NOT NULL,
   total_time_ms_delta DOUBLE PRECISION NOT NULL
- );
+);
