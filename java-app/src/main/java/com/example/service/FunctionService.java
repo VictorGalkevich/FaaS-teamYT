@@ -1,15 +1,16 @@
 package com.example.service;
 
 import com.example.domain.FunctionRequest;
-import com.google.gson.Gson;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.CustomObjectsApi;
 import io.kubernetes.client.util.Config;
 import org.springframework.stereotype.Component;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class FunctionService {
@@ -17,16 +18,17 @@ public class FunctionService {
     private final CustomObjectsApi customObjectsApi;
 
     public FunctionService() throws Exception {
-        ApiClient client = Config.fromConfig("/app/.kube/config"); // путь из docker-compose
+        ApiClient client = Config.fromConfig("/app/.kube/config");
         Configuration.setDefaultApiClient(client);
         this.customObjectsApi = new CustomObjectsApi(client);
     }
 
     public String addFunction(FunctionRequest request) {
-        Map<String, Object> service = buildKnativeService(request);
+        FunctionRequest normalized = normalizeRequest(request);
+        Map<String, Object> service = buildKnativeService(normalized);
 
         try {
-            Object result = customObjectsApi.createNamespacedCustomObject(
+            customObjectsApi.createNamespacedCustomObject(
                     "serving.knative.dev",
                     "v1",
                     "default",
@@ -36,17 +38,16 @@ public class FunctionService {
                     null,
                     null
             );
-            return new Gson().toJson(result);
+            return "success";
         } catch (ApiException e) {
-            System.err.println("Kubernetes API error:");
-            System.err.println("Code: " + e.getCode());
-            System.err.println("Body: " + e.getResponseBody());
-            System.err.println("Headers: " + e.getResponseHeaders());
-            e.printStackTrace();
-            return "error: " + e.getMessage();
+            if (e.getCode() == 409) {
+                throw new RuntimeException("Функция с таким именем уже существует.");
+            }
+            throw new RuntimeException("Ошибка Kubernetes API: " + e.getResponseBody(), e);
         }
-
     }
+
+
 
     private Map<String, Object> buildKnativeService(FunctionRequest request) {
         Map<String, Object> service = new LinkedHashMap<>();
@@ -92,4 +93,20 @@ public class FunctionService {
 
         return service;
     }
+
+    private FunctionRequest normalizeRequest(FunctionRequest request) {
+        return new FunctionRequest(
+                request.name(),
+                request.image(),
+                request.port(),
+                request.args() != null ? request.args() : List.of(),
+                request.env() != null ? request.env() : Map.of(),
+                request.minScale() != null ? request.minScale() : 1,
+                request.maxScale() != null ? request.maxScale() : 10,
+                request.metric() != null ? request.metric() : "rps",
+                request.target() != null ? request.target() : 100,
+                request.timeoutSeconds() != null ? request.timeoutSeconds() : 300
+        );
+    }
+
 }
