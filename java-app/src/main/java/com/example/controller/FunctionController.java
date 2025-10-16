@@ -18,11 +18,19 @@ public class FunctionController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addFunction(@RequestBody FunctionRequest request) {
+    public ResponseEntity<String> addFunction(@RequestBody FunctionRequest request) {
+        if (request.name() == null || request.name().isBlank() ||
+            request.image() == null || request.image().isBlank() ||
+            request.port() <= 0) {
+            return ResponseEntity.badRequest().body("Ошибка: name, image и port являются обязательными.");
+        }
+
         try {
-            return ResponseEntity.ok(functionService.addFunction(request));
+            functionService.addFunction(request);
+            return ResponseEntity.ok("Функция успешно добавлена");
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.badRequest().body("Ошибка при добавлении функции: " + ex.getMessage());
         }
     }
 }
+
