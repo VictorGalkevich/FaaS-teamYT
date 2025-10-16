@@ -95,8 +95,8 @@ func (r *Repository) InsertMetric(ctx context.Context, metric MetricsUpdate) err
 	return err
 }
 
-func ReplaceAllContainerMetrics(db *sql.DB, metricsMap map[string]QueueProxyMetrics) error {
-	tx, err := db.Begin()
+func (r *Repository) ReplaceAllContainerMetrics(ctx context.Context, metricsMap map[string]QueueProxyMetrics) error {
+	tx, err := r.db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
@@ -118,7 +118,7 @@ func ReplaceAllContainerMetrics(db *sql.DB, metricsMap map[string]QueueProxyMetr
 	defer stmt.Close()
 
 	for containerID, metrics := range metricsMap {
-		_, err = stmt.Exec(containerID, metrics.RequestCount, metrics.TotalTimeMs)
+		_, err = stmt.ExecContext(ctx, containerID, metrics.RequestCount, metrics.TotalTimeMs)
 		if err != nil {
 			return fmt.Errorf("failed to insert metrics for container %s: %w", containerID, err)
 		}
@@ -132,10 +132,10 @@ func ReplaceAllContainerMetrics(db *sql.DB, metricsMap map[string]QueueProxyMetr
 	return nil
 }
 
-func LoadContainerMetrics(db *sql.DB) (map[string]QueueProxyMetrics, error) {
+func (r *Repository) LoadContainerMetrics(ctx context.Context) (map[string]QueueProxyMetrics, error) {
 	metricsMap := make(map[string]QueueProxyMetrics)
 
-	rows, err := db.Query(`
+	rows, err := r.db.QueryContext(ctx, `
 		SELECT container_id, request_count_delta, total_time_ms_delta 
 		FROM container_last_metrics
 	`)

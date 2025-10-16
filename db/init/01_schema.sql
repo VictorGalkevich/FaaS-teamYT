@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS execution_metrics (
  );
  
  CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics(timestamp);
+
+ CREATE TABLE IF NOT EXISTS container_last_metrics (
+  container_id TEXT PRIMARY KEY,
+  request_count_delta BIGINT NOT NULL,
+  total_time_ms_delta DOUBLE PRECISION NOT NULL
+ );

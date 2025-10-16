@@ -39,7 +39,10 @@ func main() {
 
 	namespace := "default"
 
-	prevMetrics := make(map[string]QueueProxyMetrics)
+	prevMetrics, err := repository.LoadContainerMetrics(ctx)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	for range ticker.C {
 		functions, err := service.getFunctions(ctx, namespace)
@@ -103,6 +106,10 @@ func main() {
 			fmt.Printf("[%s] [%s] UPDATE METRICS: %+v\n", timestamp, function, metricsUpdate)
 
 			prevMetrics = curMetrics
+			err = repository.ReplaceAllContainerMetrics(ctx, prevMetrics)
+			if err != nil {
+				fmt.Printf("Error in replace container metrics: %+v\n", err)
+			}
 
 			repository.InsertMetric(ctx, metricsUpdate)
 		}
