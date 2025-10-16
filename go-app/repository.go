@@ -48,6 +48,7 @@ func createMetricsTableIfNotExists(db *sql.DB) error {
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   request_count_delta BIGINT NOT NULL,
   total_time_ms_delta DOUBLE PRECISION NOT NULL,
+  cold_start_ms_delta DOUBLE PRECISION NOT NULL,
   cpu_milli BIGINT NOT NULL,
   memory_mib DOUBLE PRECISION NOT NULL,
   pods_count BIGINT NOT NULL
@@ -77,16 +78,18 @@ func (r *Repository) InsertMetric(ctx context.Context, metric MetricsUpdate) err
   name,
   request_count_delta,
   total_time_ms_delta,
+  cold_start_ms_delta,
   cpu_milli,
   memory_mib,
   pods_count
- ) VALUES ($1, $2, $3, $4, $5, $6)
+ ) VALUES ($1, $2, $3, $4, $5, $6, $7)
  `
 
 	_, err := r.db.ExecContext(ctx, query,
 		metric.FunctionName,
 		metric.RequestCountDelta,
 		metric.TotalTimeMsDelta,
+		metric.ColdStartMsDelta,
 		metric.CPU,
 		metric.Memory,
 		metric.PodsCount,
