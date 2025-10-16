@@ -86,8 +86,8 @@ curl -X GET http://localhost:8080/rateplans
 ]
 ```
 
-### Получить тарифов по id
-`GET /rateplans/1` → `200 OK` с массивом объектом **RatePlans**.
+### Получить тариф по id
+`GET /rateplans/1` → `200 OK` с объектом **RatePlans**.
 
 ```bash
 curl -X GET http://localhost:8080/rateplans/1
