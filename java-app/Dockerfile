@@ -9,8 +9,9 @@ RUN mvn -q -DskipTests package
 # runtime stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+RUN adduser -D appuser
 ENV PORT=8080
 COPY --from=build /app/target/app.jar /app/app.jar
 EXPOSE 8080
-USER 10001
+USER appuser
 CMD ["java","-jar","/app/app.jar"]

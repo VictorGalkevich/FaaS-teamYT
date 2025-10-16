@@ -31,7 +31,7 @@ public class FreeTierParamsRepositoryImpl implements FreeTierParamsRepository {
         final String sql = """
                 SELECT calls, exec_ms, mem_mb_ms, cpu_mcpu_ms
                 FROM free_tier
-                ORDER BY id
+                ORDER BY id desc
                 LIMIT 1
                 """;
         try (Connection c = dataSource.getConnection();

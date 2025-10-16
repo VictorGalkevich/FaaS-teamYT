@@ -17,7 +17,7 @@ public class RatePlansRepositoryImpl implements RatePlansRepository {
     private static final String CURRENT = """
                 SELECT per_call, exec_per_ms, mem_per_mb_ms, cpu_per_mcpu_ms, cold_start_fee
                 FROM rate_plans
-                ORDER BY id
+                ORDER BY id desc
                 LIMIT 1
                 """;
 

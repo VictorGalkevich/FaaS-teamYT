@@ -51,6 +51,9 @@ func main() {
 		if err != nil {
 			fmt.Printf("Error getting functions: %v\n", err)
 		}
+			
+		curMetrics := make(map[string]QueueProxyMetrics)
+
 		for _, function := range functions {
 			pods, err := service.getServicePods(ctx, function, namespace)
 			if err != nil {
@@ -61,7 +64,6 @@ func main() {
 				FunctionName: function,
 			}
 
-			curMetrics := make(map[string]QueueProxyMetrics)
 
 			for _, pod := range pods {
 
@@ -111,12 +113,13 @@ func main() {
 			timestamp := time.Now().Format("2006-01-02 15:04:05")
 			fmt.Printf("[%s] [%s] UPDATE METRICS: %+v\n", timestamp, function, metricsUpdate)
 
-			prevMetrics = curMetrics
 			err = repository.ReplaceAllContainerMetrics(ctx, prevMetrics)
 			if err != nil {
 				fmt.Printf("Error in replace container metrics: %+v\n", err)
 			}
 			repository.InsertMetric(ctx, metricsUpdate)
 		}
+			
+		prevMetrics = curMetrics
 	}
 }
