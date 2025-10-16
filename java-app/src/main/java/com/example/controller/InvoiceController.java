@@ -3,10 +3,9 @@ package com.example.controller;
 import com.example.domain.Invoice;
 import com.example.service.BillingService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
 
 @RestController
 @RequestMapping(value = "/invoice")
@@ -17,10 +16,16 @@ public class InvoiceController {
         this.billingService = billingService;
     }
 
-    @GetMapping("/{revision}")
-    public ResponseEntity<?> getInvoice(@PathVariable("revision") String revision) {
+    @GetMapping("/{name}")
+    public ResponseEntity<?> getInvoice(
+            @PathVariable("name") String name,
+            @RequestParam("from") String from,
+            @RequestParam("to") String to
+    ) {
         try {
-            return ResponseEntity.ok(billingService.getInvoiceForRevision(revision));
+            var fromTime = Timestamp.valueOf(from);
+            var toTime = Timestamp.valueOf(to);
+            return ResponseEntity.ok(billingService.getInvoiceForRevision(fromTime, toTime, name));
         } catch (Exception ex) {
             return ResponseEntity.ok(ex.getMessage());
         }

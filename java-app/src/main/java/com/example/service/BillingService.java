@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.Instant;
 
 @Component
 public class BillingService {
@@ -25,10 +24,10 @@ public class BillingService {
         this.freeTierParamsRepository = freeTierParamsRepository;
     }
 
-    public Invoice getInvoiceForRevision(String name) throws SQLException {
+    public Invoice getInvoiceForRevision(Timestamp fromTime, Timestamp toTime, String name) throws SQLException {
         ExecutionMetrics metrics = metricsRepository.getExecutionMetricsByName(
-                Timestamp.from(Instant.now().minusSeconds(3600)),
-                Timestamp.from(Instant.now().plusSeconds(3600)),
+                fromTime,
+                toTime,
                 name
         );
         RatePlans ratePlans = ratePlansRepository.getRatePlans();
