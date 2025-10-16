@@ -1,16 +1,9 @@
 ## FaaS система биллинга (Team YT)
 
-## Описание эндпоинтов
-
-# API документация
-
-Базовый URL при локальном запуске: `http://localhost:8080`  
-Документацию можно получить по путям /swagger-ui.html,
----
-
 ## Содержание
 
 - [Форматы запросов и ответов](#форматы-запросов-и-ответов)
+- [Формула расчета стоимости](#формула-расчета-стоимости)
 - [Обзор эндпоинтов](#обзор-эндпоинтов)
 - [Тарифные планы (`/rateplans`)](#тарифные-планы-rateplans)
 - [Бесплатный пакет (`/free-tier`)](#бесплатный-тариф-free-tier)
@@ -18,6 +11,36 @@
 - [Инвойс за период (`/invoice/{name}`)](#инвойс-за-период-invoicename)
 - [Схемы данных](#схемы-данных)
 - [Инструкция для запуска](#инструкция-для-запуска)
+---
+
+## Формула расчета стоимости
+
+Стоимость мы считаем по следущей формуле:
+
+```
+finalCost = costForCalls + costForExecutionTime + costForMemoryUsed + costForCpuUtilization + costForColdStarts
+```
+
+Где, в свою очередь,
+
+```
+costForCalls = pricePerCall * max(0, calls - freeTierCalls)
+costForExecutionTime = pricePerMsOfExec * max(0, execMs - freeTierExecutionMs)
+costForMemoryUsed = pricePerMbMsOfMem * max(0, memMbMs - freeTierMbMs)
+costForCpuUtilization = pricePerMcpuMsOfCpu * max(0, cpuMcpuMs - freeTierMcpuMs)
+costForColdStarts = pricePerColdStartMs * max(0, coldStartMs)
+```
+А значения параметров описаны в 
+- [Схемы данных](#схемы-данных)
+
+и в частности для **Rate Plans** и **Free Tier** настраиваются администратором с целью предоставить некоторую программу лояльности
+
+## Описание эндпоинтов
+
+# API документация
+
+Базовый URL при локальном запуске: `http://localhost:8080`  
+Документацию можно получить по путям /swagger-ui.html, /v3/api-docs
 ---
 
 ## Форматы запросов и ответов
@@ -195,7 +218,7 @@ curl -X POST http://localhost:8080/function/add   -H "Content-Type: application/
     "execMs": 6,
     "memMbMs": 1.74375,
     "cpuMcpuMs": 1.2,
-    "coldStarts": 0
+    "coldStartMs": 0
   },
   "finalCost": 0.000006025734375,
   "costForCalls": 0,
