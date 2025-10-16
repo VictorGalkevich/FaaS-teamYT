@@ -21,7 +21,7 @@ func getConnectionString() string {
 
 func main() {
 
-	_, err := NewRepository(getConnectionString())
+	repository, err := NewRepository(getConnectionString())
 
 	if err != nil {
 		panic(err.Error())
@@ -105,6 +105,8 @@ func main() {
 				fmt.Printf("[%s] [%s] UPDATE METRICS: %+v\n", timestamp, function, metricsUpdate)
 
 				prevMetrics = curMetrics
+
+				repository.Insert(ctx, metricsUpdate)
 			}
 		}
 	}
