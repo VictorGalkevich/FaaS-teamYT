@@ -1,0 +1,47 @@
+name: Deploy Application to VM
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  VM_IP: ${{ secrets.VM_IP }}
+  VM_USER: ${{ secrets.VM_USER }}
+  VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$VM_SSH_KEY" > ~/.ssh/vm_key
+          chmod 600 ~/.ssh/vm_key
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "UserKnownHostsFile /dev/null" >> ~/.ssh/config
+
+      - name: Copy scripts to VM
+        run: |
+          scp -i ~/.ssh/vm_key \
+            setting_vm.sh run.sh \
+            $VM_USER@$VM_IP:/home/$VM_USER/
+
+      - name: Execute setting_vm.sh on VM
+        run: |
+          ssh -i ~/.ssh/vm_key $VM_USER@$VM_IP \
+            "chmod +x /home/$VM_USER/setting_vm.sh && /home/$VM_USER/setting_vm.sh"
+
+      - name: Execute run.sh on VM
+        run: |
+          ssh -i ~/.ssh/vm_key $VM_USER@$VM_IP \
+            "chmod +x /home/$VM_USER/run.sh && /home/$VM_USER/run.sh"
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/vm_key $VM_USER@$VM_IP \
+            "kubectl get pods -A && kubectl get ksvc -A"
