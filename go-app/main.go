@@ -17,7 +17,7 @@ type MetricsUpdate struct {
 }
 
 func getConnectionString() string {
-	return "postgres://app:app@host.docker.internal:5432/db?sslmode=disable"
+	return "postgres://app:app@localhost:5432/db?sslmode=disable"
 }
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
 		if err != nil {
 			fmt.Printf("Error getting functions: %v\n", err)
 		}
-			
+
 		curMetrics := make(map[string]QueueProxyMetrics)
 
 		for _, function := range functions {
@@ -63,7 +63,6 @@ func main() {
 			metricsUpdate := MetricsUpdate{
 				FunctionName: function,
 			}
-
 
 			for _, pod := range pods {
 
@@ -119,7 +118,7 @@ func main() {
 			}
 			repository.InsertMetric(ctx, metricsUpdate)
 		}
-			
+
 		prevMetrics = curMetrics
 	}
 }
