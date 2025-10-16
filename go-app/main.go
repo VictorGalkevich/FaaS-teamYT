@@ -13,6 +13,7 @@ type MetricsUpdate struct {
 	CPU               int64   // milli CPU
 	Memory            float64 // MiB
 	PodsCount         int64
+	ColdStartMsDelta  int64
 }
 
 func getConnectionString() string {
@@ -34,7 +35,8 @@ func main() {
 
 	ctx := context.Background()
 
-	ticker := time.NewTicker(5 * time.Second)
+	interval := 5 * time.Second
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	namespace := "default"
@@ -66,7 +68,6 @@ func main() {
 				user, queueProxy := service.getContainers(pod)
 
 				if user == nil || queueProxy == nil {
-					fmt.Printf("containers are nil :(\n")
 					continue
 				}
 
@@ -86,6 +87,11 @@ func main() {
 					} else {
 						metricsUpdate.RequestCountDelta += queueProxyMetrics.RequestCount
 						metricsUpdate.TotalTimeMsDelta += queueProxyMetrics.TotalTimeMs
+
+						if queueProxyMetrics.RequestCount > 0 {
+							metricsUpdate.ColdStartMsDelta += time.Now().Sub(user.State.Running.StartedAt.Time).Milliseconds()
+						}
+
 					}
 
 					curMetrics[containerId] = *queueProxyMetrics
@@ -110,7 +116,6 @@ func main() {
 			if err != nil {
 				fmt.Printf("Error in replace container metrics: %+v\n", err)
 			}
-
 			repository.InsertMetric(ctx, metricsUpdate)
 		}
 	}
